@@ -1,0 +1,13 @@
+.stock-column{
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  margin-top: 8px;
+  gap: 8px;
+}
+
+.stock-column-title{
+  font-weight: bold;
+  font-size: larger;
+  text-align: center;
+}
