@@ -1,0 +1,20 @@
+.data-preview{
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.data-preview  table{
+  border-collapse: collapse;
+  font-size: small;
+} 
+
+.data-preview  td, th {
+  border: 1px solid #000000;
+  text-align: left;
+  padding: 8px;
+}
+
+.data-preview tbody  tr:not(:nth-child(even)) {
+  background-color: #dddddd;
+}

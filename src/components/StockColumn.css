@@ -1,0 +1,21 @@
+.stock-column {
+  display: flex;
+  flex-direction: column;
+  width: calc(50% - 32px);
+  margin: 8px;
+  gap: 8px;
+}
+
+.stock-column-title {
+  font-weight: bold;
+  font-size: larger;
+  text-align: center;
+  width: 100%;
+}
+
+.stock-column-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

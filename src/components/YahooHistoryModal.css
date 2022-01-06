@@ -1,0 +1,35 @@
+.yahoo-history-modal-backdrop {
+  left: 0;
+  top: 0;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  z-index: 5;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.yahoo-history-modal-content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 90%;
+  height: 90%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background-color: rgb(255, 255, 255);
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+
+.yahoo-history-chart{
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.yahoo-history-config{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

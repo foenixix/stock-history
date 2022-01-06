@@ -1,0 +1,9 @@
+.date-input{
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.date-picker{
+  width: 100px;
+}
