@@ -8,10 +8,38 @@ import c3 from "c3";
 import "c3/c3.css";
 import "./YahooHistoryModal.css";
 import { DateInput } from "./DateInput";
+import { Interval, IntervalInput } from "./IntervalInput";
+import { RollingWindowAnalysis } from "./RollingWindowAnalysis";
+
+const DAYS_TO_MILLIS = 24 * 60 * 60 * 1000;
 
 interface Props {
   history: StockDay[];
   onClose: () => void;
+}
+
+function simplifyTimeline(timeline: StockDaySimulation[], interval: Interval) {
+  if (interval === Interval.DAY) {
+    return timeline;
+  } else {
+    let intervalInMillis: number;
+    if (interval === Interval.WEEK) {
+      intervalInMillis = 7 * DAYS_TO_MILLIS;
+    } else if (interval === Interval.MONTH) {
+      intervalInMillis = 30 * DAYS_TO_MILLIS;
+    } else if (interval === Interval.YEAR) {
+      intervalInMillis = 365 * DAYS_TO_MILLIS;
+    }
+    let lastMoment = 0;
+    return timeline.filter(({ date }) => {
+      if (date.getTime() - lastMoment > intervalInMillis) {
+        lastMoment = date.getTime();
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
 }
 
 function toData(timeLine: StockDaySimulation[]) {
@@ -29,9 +57,8 @@ export const YahooHistoryModal = ({ history, onClose }: Props) => {
   const [endTime, setEndTime] = useState<Date>(
     history[history.length - 1].date
   );
-  const [timeLine, setTimeLine] = useState<StockDaySimulation[]>(
-    calculateTimeLine(history, startTime, endTime)
-  );
+  const [interval, setInterval] = useState<Interval>(Interval.WEEK);
+  const [timeLine, setTimeLine] = useState<StockDaySimulation[]>([]);
   const chartDivRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<c3.ChartAPI>();
 
@@ -58,10 +85,16 @@ export const YahooHistoryModal = ({ history, onClose }: Props) => {
         right: 30,
       },
     });
+
+    setTimeLine(
+      simplifyTimeline(calculateTimeLine(history, startTime, endTime), interval)
+    );
   }, []);
 
   function updateTimeLine() {
-    setTimeLine(calculateTimeLine(history, startTime, endTime));
+    setTimeLine(
+      simplifyTimeline(calculateTimeLine(history, startTime, endTime), interval)
+    );
   }
 
   return (
@@ -69,8 +102,9 @@ export const YahooHistoryModal = ({ history, onClose }: Props) => {
       <div className="yahoo-history-modal-backdrop" onClick={onClose} />
       <div className="yahoo-history-modal-content">
         <div className="yahoo-history-chart" ref={chartDivRef} />
-        <div>
-          <div className="yahoo-history-config">
+        <div className="yahoo-history-sub-chart">
+          <div className="yahoo-history-column">
+            <div className="yahoo-history-title">Config</div>
             <DateInput
               label="Begin:"
               value={startTime}
@@ -85,6 +119,7 @@ export const YahooHistoryModal = ({ history, onClose }: Props) => {
               minDate={history[0].date}
               maxDate={history[history.length - 1].date}
             />
+            <IntervalInput value={interval} onChange={setInterval} />
             <button
               onClick={updateTimeLine}
               style={{ width: "fit-content" }}
@@ -93,8 +128,10 @@ export const YahooHistoryModal = ({ history, onClose }: Props) => {
               Apply
             </button>
           </div>
-          <div className="yahoo-history-separation-line" />
-          <div className="yahoo-history-data"></div>
+          <div className="yahoo-history-column">
+            <div className="yahoo-history-title">Analysis</div>
+            <RollingWindowAnalysis timeLine={timeLine} />
+          </div>
         </div>
       </div>
     </>

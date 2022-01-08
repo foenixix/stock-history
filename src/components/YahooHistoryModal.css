@@ -24,12 +24,28 @@
 
 .yahoo-history-chart{
   position: relative;
+  height: 30%;
   width: 100%;
   box-sizing: border-box;
 }
 
-.yahoo-history-config{
+.yahoo-history-sub-chart{
+  display: flex;
+  flex-direction: row;
+  height: 70%;
+}
+
+.yahoo-history-column{
+  height: 100%;
+  width: 50%;
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.yahoo-history-title{
+  width: 100%;
+  text-align: center;
+  font-size: larger;
+  font-weight: bold;
 }

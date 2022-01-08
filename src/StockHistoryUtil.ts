@@ -14,6 +14,20 @@ export interface StockDaySimulation {
   date: Date;
 }
 
+export interface StockAnalysis {
+  startDay: Date;
+  endDay: Date;
+  normalGain: number;
+  leveragedGain: number;
+  gainComparison: number;
+}
+
+export interface SpecialAnalysis {
+  best: StockAnalysis;
+  worst: StockAnalysis;
+  median: StockAnalysis;
+}
+
 function calculateGains(
   previousEnd: number,
   currentEnd: number,
@@ -60,18 +74,28 @@ export function yahooDataToStockDays(
   return result;
 }
 
-function getClosestDayIndex(history: StockDay[], day: Date) {
-  let smallestStartDiff = Number.MAX_SAFE_INTEGER;
-  let startIndex = 0;
+function getMaxElementIndex<T>(array: T[], predicate: (element: T) => number): number{
+  let biggestValue = 0;
+  let index = 0;
 
-  for (let i = 0; i < history.length; i++) {
-    const diff = Math.abs(history[i].date.getTime() - day.getTime());
-    if (diff < smallestStartDiff) {
-      startIndex = i;
-      smallestStartDiff = diff;
+  for (let i = 0; i < array.length; i++) {
+    const value = predicate(array[i]);
+    if (biggestValue < value) {
+      index = i;
+      biggestValue = value;
     }
   }
-  return startIndex;
+  return index;
+
+}
+
+function getMaxElement<T>(array: T[], predicate: (element: T) => number): T{
+  return array[getMaxElementIndex(array, predicate)];
+}
+
+
+function getClosestDayIndex(history: { date: Date }[], day: Date) {
+  return getMaxElementIndex(history, ({date}) => Number.MAX_SAFE_INTEGER - Math.abs(date.getTime() - day.getTime()) );
 }
 
 /**
@@ -110,5 +134,47 @@ export function calculateTimeLine(
       date,
     });
   }
+  return result;
+}
+
+export function analyseTimeLine(
+  timeLine: StockDaySimulation[],
+  windowSizeInDays: number
+): StockAnalysis[] {
+  const windowSizeInMillis = windowSizeInDays * 24 * 60 * 60 * 1000;
+  const result = [] as StockAnalysis[];
+
+  let startDayIndex = 0;
+  let startDay = timeLine[0].date;
+
+  while (true) {
+    const startDay = timeLine[startDayIndex];
+    const endDayIndex = getClosestDayIndex(
+      timeLine,
+      new Date(startDay.date.getTime() + windowSizeInMillis)
+    );
+    const endDay = timeLine[endDayIndex];
+    if (
+      endDay.date.getTime() - startDay.date.getTime() <
+        windowSizeInMillis * 0.9 ||
+      (endDayIndex === timeLine.length &&
+        result[result.length - 1].endDay.getTime === endDay.date.getTime)
+    ) {
+      break;
+    }
+
+    const normalGain = (endDay.normalStopValue - startDay.normalStopValue) /(startDay.normalStopValue);
+    const leveragedGain = (endDay.leveragedStopValue - startDay.leveragedStopValue) /(startDay.leveragedStopValue);
+    result.push({
+      startDay: startDay.date,
+      endDay: endDay.date,
+      normalGain,
+      leveragedGain,
+      gainComparison: leveragedGain/normalGain,
+    });
+
+    startDayIndex++;
+  }
+
   return result;
 }
